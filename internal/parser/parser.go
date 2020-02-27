@@ -63,3 +63,38 @@ func ParseString(s string) (*types.Deposit, error) {
 	return d, nil
 
 }
+
+type tmpDepositResponse struct {
+	ID         string `json:"id"`
+	CustomerID string `json:"customer_id"`
+	Accepted   bool   `json:"accepted"`
+}
+
+// ParseOutput for verification
+func ParseOutput(s string) (*types.DepositResponse, error) {
+
+	tmpDR := &tmpDepositResponse{}
+
+	err := json.Unmarshal([]byte(s), tmpDR)
+	if err != nil {
+		return nil, errors.Wrap(err, "Could not parse deposit")
+	}
+
+	idInt, err := strconv.Atoi(tmpDR.ID)
+	if err != nil {
+		return nil, errors.Wrap(err, "Could not convert id")
+	}
+
+	customerIDInt, err := strconv.Atoi(tmpDR.CustomerID)
+	if err != nil {
+		return nil, errors.Wrap(err, "Could not convert customerID")
+	}
+
+	dr := &types.DepositResponse{
+		ID:         idInt,
+		CustomerID: customerIDInt,
+		Accepted:   tmpDR.Accepted,
+	}
+
+	return dr, nil
+}
