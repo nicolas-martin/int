@@ -7,11 +7,12 @@ import (
 
 // Decider evaluates the message and compares the rules
 type Decider struct {
-	Rules      *types.Rules
+	rules      *types.Rules
 	repository repository.IRepository
 }
 
 // NewDecider creates a new instance of decider
+// Rules could be taken from env variables or as a parameter
 func NewDecider(repo repository.IRepository) *Decider {
 	r := &types.Rules{
 		DayLimit:              5_000.0,
@@ -19,7 +20,7 @@ func NewDecider(repo repository.IRepository) *Decider {
 		TransationLimitPerDay: 3,
 	}
 
-	return &Decider{Rules: r, repository: repo}
+	return &Decider{rules: r, repository: repo}
 
 }
 
@@ -68,7 +69,7 @@ func (d *Decider) ProcessDeposit(deposit *types.Deposit) (*types.DepositResponse
 	totalDailyAttempt := totalDaily + deposit.LoadAmount
 	totalWeeklyAttempt := totalWeek + deposit.LoadAmount
 
-	if totalDailyAttempt > d.Rules.DayLimit || len(lastDay) > d.Rules.TransationLimitPerDay || totalWeeklyAttempt > d.Rules.WeekLimit {
+	if totalDailyAttempt > d.rules.DayLimit || len(lastDay) > d.rules.TransationLimitPerDay || totalWeeklyAttempt > d.rules.WeekLimit {
 		return response, nil
 	}
 	response.Accepted = true

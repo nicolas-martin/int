@@ -44,7 +44,7 @@ func ParseString(s string) (*types.Deposit, error) {
 		return nil, errors.Wrap(err, "Could not conver load amount")
 	}
 
-	//Mon Jan 2 15:04:05 -0700 MST 2006
+	// Mon Jan 2 15:04:05 -0700 MST 2006
 	// RFC3339     = "2006-01-02T15:04:05Z07:00"
 	parsedTime, err := time.Parse(time.RFC3339, tmpD.Time)
 	if err != nil {

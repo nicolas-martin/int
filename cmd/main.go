@@ -17,10 +17,7 @@ func main() {
 	repo := repository.NewRepository()
 	decider := decider.NewDecider(repo)
 
-	f, err := os.Open("../input.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
+	f := tryOpen("input.txt")
 	defer f.Close()
 
 	scanner := bufio.NewScanner(f)
@@ -37,10 +34,15 @@ func main() {
 		}
 
 		if resp.Accepted {
-			repo.Create(deposit)
+			err := repo.Create(deposit)
+			if err != nil {
+				log.Print(err)
+			}
+
 		}
 
 		responses = append(responses, resp)
+		printResp(resp)
 
 	}
 
@@ -48,10 +50,7 @@ func main() {
 }
 
 func verify(responses []*types.DepositResponse) {
-	f, err := os.Open("../output.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
+	f := tryOpen("output.txt")
 	defer f.Close()
 	scanner := bufio.NewScanner(f)
 	outputResponses := make(map[int]*types.DepositResponse)
@@ -62,10 +61,11 @@ func verify(responses []*types.DepositResponse) {
 		}
 		outputResponses[depositResponse.ID] = depositResponse
 	}
+
 	count := 0
 	for _, v := range responses {
 		if v.Accepted != outputResponses[v.ID].Accepted {
-			fmt.Printf("My output %+v, expected %+v \r\n", v, outputResponses[v.ID])
+			// fmt.Printf("My output %+v, expected %+v \r\n", v, outputResponses[v.ID])
 			count++
 		}
 
@@ -80,4 +80,19 @@ func printResp(resp *types.DepositResponse) {
 		log.Fatal(err)
 	}
 	fmt.Println(string(respStr))
+}
+
+func tryOpen(path string) *os.File {
+	var f *os.File
+	f, err := os.Open(fmt.Sprintf("../%s", path))
+	if err != nil {
+		f, err = os.Open(path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return f
+
+	}
+	return f
+
 }

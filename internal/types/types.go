@@ -19,7 +19,8 @@ type DepositResponse struct {
 
 // Rules represents specific transaction rules
 // Could have chosen to do map[time.Duration]float64
-// if we wanted to have more control over the "look back // period. For now I'll use set intervals
+// if we wanted to have more control over the "look back
+// period". For now I'll use set intervals
 type Rules struct {
 	DayLimit              float64
 	WeekLimit             float64
