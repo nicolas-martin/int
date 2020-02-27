@@ -30,10 +30,8 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		// rr, _ := json.Marshal(deposit)
-		// fmt.Printf("\r\n %v \r\n", string(rr))
 
-		resp, err := decider.IsTransactionAllowed(deposit)
+		resp, err := decider.ProcessDeposit(deposit)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -43,7 +41,6 @@ func main() {
 		}
 
 		responses = append(responses, resp)
-		// printResp(resp)
 
 	}
 
@@ -66,14 +63,11 @@ func verify(responses []*types.DepositResponse) {
 		outputResponses[depositResponse.ID] = depositResponse
 	}
 	count := 0
-	right := 0
 	for _, v := range responses {
 		if v.Accepted != outputResponses[v.ID].Accepted {
-			// fmt.Printf("got = %+v, exptected = %+v\n", v, outputResponses[v.ID])
+			fmt.Printf("My output %+v, expected %+v \r\n", v, outputResponses[v.ID])
 			count++
-			continue
 		}
-		right++
 
 	}
 
@@ -81,11 +75,9 @@ func verify(responses []*types.DepositResponse) {
 }
 
 func printResp(resp *types.DepositResponse) {
-
 	respStr, err := json.Marshal(resp)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(string(respStr))
-
 }

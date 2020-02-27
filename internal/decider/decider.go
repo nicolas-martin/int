@@ -23,25 +23,24 @@ func NewDecider(repo repository.IRepository) *Decider {
 
 }
 
-// IsTransactionAllowed checks if the deposit is allowed given a set of rules.
-func (d *Decider) IsTransactionAllowed(deposit *types.Deposit) (*types.DepositResponse, error) {
-	deposits, err := d.repository.RetrieveAll(deposit.ID)
+// ProcessDeposit checks if the deposit is allowed given a set of rules.
+func (d *Decider) ProcessDeposit(deposit *types.Deposit) (*types.DepositResponse, error) {
+	deposits, err := d.repository.RetrieveAll(deposit.CustomerID)
+	if err != nil {
+		return nil, err
+	}
+
 	response := &types.DepositResponse{
 		ID:         deposit.ID,
 		CustomerID: deposit.CustomerID,
 		Accepted:   false,
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
 	lastDay := make([]*types.Deposit, 0)
 
-	// Check for lastday first
 	for _, v := range deposits {
-		delta := deposit.Time.Sub(v.Time).Hours()
-		if delta < 24 {
+		// delta := deposit.Time.Sub(v.Time).Hours()
+		if deposit.Time.Day() == v.Time.Day() {
 			lastDay = append(lastDay, v)
 		}
 	}
@@ -53,8 +52,10 @@ func (d *Decider) IsTransactionAllowed(deposit *types.Deposit) (*types.DepositRe
 
 	lastWeek := make([]*types.Deposit, 0)
 	for _, v := range deposits {
-		delta := deposit.Time.Sub(v.Time).Hours() / 24
-		if delta < 7 {
+		// delta := deposit.Time.Sub(v.Time).Hours() / 24
+		dy, dw := deposit.Time.ISOWeek()
+		vy, vw := v.Time.ISOWeek()
+		if dy == vy && dw == vw {
 			lastWeek = append(lastWeek, v)
 		}
 	}
@@ -64,7 +65,10 @@ func (d *Decider) IsTransactionAllowed(deposit *types.Deposit) (*types.DepositRe
 		totalWeek += v.LoadAmount
 	}
 
-	if totalDaily+deposit.LoadAmount > d.Rules.DayLimit || len(lastDay) > d.Rules.TransationLimitPerDay || totalWeek+deposit.LoadAmount > d.Rules.WeekLimit {
+	totalDailyAttempt := totalDaily + deposit.LoadAmount
+	totalWeeklyAttempt := totalWeek + deposit.LoadAmount
+
+	if totalDailyAttempt > d.Rules.DayLimit || len(lastDay) > d.Rules.TransationLimitPerDay || totalWeeklyAttempt > d.Rules.WeekLimit {
 		return response, nil
 	}
 	response.Accepted = true

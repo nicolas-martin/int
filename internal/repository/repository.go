@@ -26,7 +26,6 @@ func NewRepository() IRepository {
 // Create creates a deposit entry in the store
 func (r *Repository) Create(d *types.Deposit) error {
 	r.data = append(r.data, d)
-
 	return nil
 }
 
@@ -34,7 +33,7 @@ func (r *Repository) Create(d *types.Deposit) error {
 func (r *Repository) RetrieveAll(id int) ([]*types.Deposit, error) {
 	result := make([]*types.Deposit, 0)
 	for _, v := range r.data {
-		if v.ID == id {
+		if v.CustomerID == id {
 			result = append(result, v)
 		}
 	}
