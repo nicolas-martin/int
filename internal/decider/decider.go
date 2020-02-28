@@ -41,7 +41,7 @@ func (d *Decider) ProcessDeposit(deposit *types.Deposit) (*types.DepositResponse
 
 	for _, v := range deposits {
 		// delta := deposit.Time.Sub(v.Time).Hours()
-		if deposit.Time.Day() == v.Time.Day() {
+		if deposit.Time.Day() == v.Time.Day() && deposit.Time.Month() == v.Time.Month() && deposit.Time.Year() == v.Time.Year() {
 			lastDay = append(lastDay, v)
 		}
 	}
